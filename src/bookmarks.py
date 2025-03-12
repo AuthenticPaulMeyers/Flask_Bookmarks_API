@@ -71,3 +71,26 @@ def handle_bookmarks():
 
             }
         return jsonify({'data': data, 'metadata': metadata}), HTTP_200_OK
+
+# retrieve a specific bookmark using the its id
+@bookmarks.get("<int:id>")
+@jwt_required()
+def get_bookmark(id):
+    current_user_id=get_jwt_identity()
+
+    bookmark=Bookmark.query.filter_by(id=id, user_id=current_user_id).first()
+
+    if not bookmark:
+        return jsonify({
+            'message': "Item not found"
+        }), HTTP_404_NOT_FOUND
+    
+    return jsonify({
+        'id': bookmark.id,
+        'body': bookmark.body,
+        'url': bookmark.url,
+        'short_url': bookmark.short_url,
+        'visits': bookmark.visits,
+        'created_at': bookmark.created_at,
+        'updated_at': bookmark.updated_at
+    }), HTTP_200_OK
