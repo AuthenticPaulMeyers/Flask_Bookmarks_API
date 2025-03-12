@@ -97,3 +97,14 @@ def get_user():
              "email": user.email
         }
     }), HTTP_200_OK
+
+# create use refresh token
+@auth.get('/token/refresh')
+@jwt_required(refresh=True)
+def refresh_user_toke():
+    identity=get_jwt_identity()
+    access=create_access_token(identity=str(identity))
+
+    return jsonify({
+        'access': access
+    }), HTTP_200_OK
