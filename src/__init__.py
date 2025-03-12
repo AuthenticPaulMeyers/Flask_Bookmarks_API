@@ -1,9 +1,11 @@
-from flask import Flask, redirect
+from flask import Flask, redirect, jsonify
 import os 
 from src.auth import auth
 from src.bookmarks import bookmarks
 from src.database import db, Bookmark
 from flask_jwt_extended import JWTManager
+from src.constants.http_status_code import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT, HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_405_METHOD_NOT_ALLOWED
+
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
@@ -39,4 +41,18 @@ def create_app(test_config=None):
             db.session.commit()
         return redirect(bookmark.url)
     
+    # handle errors here
+    @app.errorhandler(HTTP_404_NOT_FOUND)
+    def handle_404(e):
+        return jsonify({'error': "Not found!"}), HTTP_404_NOT_FOUND
+    
+    # internal server error
+    @app.errorhandler(HTTP_500_INTERNAL_SERVER_ERROR)
+    def handle_500(e):
+        return jsonify({'error': "Something went wrong!"}), HTTP_500_INTERNAL_SERVER_ERROR
+    
+    # routing error - method not allowed error
+    @app.errorhandler(HTTP_405_METHOD_NOT_ALLOWED)
+    def handle_405(e):
+        return jsonify({'error': "Something went wrong!"}), HTTP_405_METHOD_NOT_ALLOWED
     return app

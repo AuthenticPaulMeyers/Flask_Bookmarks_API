@@ -11,6 +11,7 @@ bookmarks = Blueprint("bookmarks", __name__, url_prefix="/api/v1/bookmarks")
 def handle_bookmarks():
     current_user_id=get_jwt_identity()
 
+    # add the bookmark
     if request.method == 'POST':
         body = request.get_json().get('body', '')
         url = request.get_json().get('url', '')
@@ -72,7 +73,7 @@ def handle_bookmarks():
             }
         return jsonify({'data': data, 'metadata': metadata}), HTTP_200_OK
 
-# retrieve a specific bookmark using the its id
+# retrieve a specific bookmark using its id
 @bookmarks.get("<int:id>")
 @jwt_required()
 def get_bookmark(id):
