@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from src.constants.http_status_code import HTTP_201_CREATED, HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT, HTTP_404_NOT_FOUND
 import validators
 from src.database import User, db
-from flask_jwt_extended import create_access_token, create_refresh_token
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 
 auth = Blueprint("auth", __name__, url_prefix="/api/v1/auth")
 
@@ -67,13 +67,14 @@ def login():
         is_password_checked = check_password_hash(user.password, password)
 
         if is_password_checked:
-            refresh=create_refresh_token(identity=user.id)
-            access=create_access_token(identity=user.id)
+            refresh=create_refresh_token(identity=str(user.id))
+            access=create_access_token(identity=str(user.id))
 
             return jsonify({
                 'user': {
                     'refresh': refresh,
                     'access': access,
+                    'id': user.id,
                     'username': user.username,
                     'email': user.email
                 }}), HTTP_200_OK
@@ -81,9 +82,18 @@ def login():
     # if the user is not found
     return jsonify({"Error": 'Wrong username or password'}), HTTP_404_NOT_FOUND
 
-        
 
-
+# get the user credentials after login
 @auth.get("/me")
+@jwt_required()
 def get_user():
-    return ({'user': 'me'})
+    user_id = get_jwt_identity()
+
+    user=User.query.filter_by(id=user_id).first()
+
+    return jsonify({
+        'user': {
+             "username": user.username,
+             "email": user.email
+        }
+    }), HTTP_200_OK
