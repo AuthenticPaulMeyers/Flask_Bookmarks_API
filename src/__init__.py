@@ -1,8 +1,8 @@
-from flask import Flask
+from flask import Flask, redirect
 import os 
 from src.auth import auth
 from src.bookmarks import bookmarks
-from src.database import db
+from src.database import db, Bookmark
 from flask_jwt_extended import JWTManager
 
 def create_app(test_config=None):
@@ -27,4 +27,16 @@ def create_app(test_config=None):
 
     app.register_blueprint(auth)
     app.register_blueprint(bookmarks)
+    
+    # short url redirect route
+    @app.get("/<string:short_url>")
+    def get_short_url_redirect(short_url):
+        bookmark=Bookmark.query.filter_by(short_url=short_url).first_or_404()
+
+        if bookmark:
+            # increment the visits count by 1
+            bookmark.visits=bookmark.visits+1 
+            db.session.commit()
+        return redirect(bookmark.url)
+    
     return app
