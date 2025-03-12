@@ -54,5 +54,6 @@ def create_app(test_config=None):
     # routing error - method not allowed error
     @app.errorhandler(HTTP_405_METHOD_NOT_ALLOWED)
     def handle_405(e):
-        return jsonify({'error': "Something went wrong!"}), HTTP_405_METHOD_NOT_ALLOWED
+        return jsonify({'error': "Wrong address. Make sure you type your URL correctly!"}), HTTP_405_METHOD_NOT_ALLOWED
+    
     return app
