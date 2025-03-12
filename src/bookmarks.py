@@ -42,9 +42,13 @@ def handle_bookmarks():
             'updated_at': bookmark.updated_at
         }), HTTP_201_CREATED
     else:
-        bookmarks=Bookmark.query.filter_by(user_id=current_user_id)
+        # implementing a pagination to limit the number of items to display per page
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 5, type=int)
+
+        bookmarks=Bookmark.query.filter_by(user_id=current_user_id).paginate(page=page, per_page=per_page)
         data = []
-        for bookmark in bookmarks:
+        for bookmark in bookmarks.items:
             data.append(
                 {
                     'id': bookmark.id,
@@ -56,4 +60,14 @@ def handle_bookmarks():
                     'updated_at': bookmark.updated_at
                 }
             )
-        return jsonify({'data': data}), HTTP_200_OK
+            metadata={
+                'page':bookmarks.page,
+                'pages':bookmarks.pages,
+                'total_count':bookmarks.total,
+                'has_next':bookmarks.has_next,
+                'has_prev':bookmarks.has_prev,
+                'prev_page':bookmarks.prev_num,
+                'next_page':bookmarks.next_num
+
+            }
+        return jsonify({'data': data, 'metadata': metadata}), HTTP_200_OK
