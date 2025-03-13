@@ -3,11 +3,13 @@ from src.database import Bookmark, db
 from src.constants.http_status_code import HTTP_201_CREATED, HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT, HTTP_404_NOT_FOUND, HTTP_204_NO_CONTENT
 import validators
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from flasgger import swag_from
 
 bookmarks = Blueprint("bookmarks", __name__, url_prefix="/api/v1/bookmarks")
 
 @bookmarks.route("/", methods=['POST', 'GET'])
 @jwt_required()
+@swag_from('./docs/bookmarks/bookmarks.yaml')
 def handle_bookmarks():
     current_user_id=get_jwt_identity()
 
@@ -76,6 +78,7 @@ def handle_bookmarks():
 # retrieve a specific bookmark using its id
 @bookmarks.get("<int:id>")
 @jwt_required()
+@swag_from('./docs/bookmarks/get_bookmark.yaml')
 def get_bookmark(id):
     current_user_id=get_jwt_identity()
 
@@ -149,10 +152,10 @@ def delete_bookmark(id):
 
     return jsonify({}), HTTP_204_NO_CONTENT
 
-
 # get the stats for the URL visited
 @bookmarks.get("/stats")
 @jwt_required()
+@swag_from('./docs/bookmarks/stats.yaml')
 def stats():
     current_user_id=get_jwt_identity()
     

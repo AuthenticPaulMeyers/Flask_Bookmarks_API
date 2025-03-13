@@ -4,11 +4,13 @@ from src.constants.http_status_code import HTTP_201_CREATED, HTTP_200_OK, HTTP_4
 import validators
 from src.database import User, db
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+from flasgger import swag_from
 
 auth = Blueprint("auth", __name__, url_prefix="/api/v1/auth")
 
 # user register route
 @auth.post("/register")
+@swag_from('./docs/auth/register.yaml')
 def register():
     username = request.json['username']
     email = request.json['email']
@@ -55,6 +57,7 @@ def register():
 
 # user login route
 @auth.post("/login")
+@swag_from('./docs/auth/login.yaml')
 def login():
     email = request.json.get("email","")
     password = request.json.get("password","")

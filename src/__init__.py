@@ -5,7 +5,8 @@ from src.bookmarks import bookmarks
 from src.database import db, Bookmark
 from flask_jwt_extended import JWTManager
 from src.constants.http_status_code import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT, HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_405_METHOD_NOT_ALLOWED
-
+from flasgger import swag_from, Swagger
+from src.config.swagger import swagger_config, template
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
@@ -15,7 +16,11 @@ def create_app(test_config=None):
             SECRET_KEY=os.environ.get("SECRET_KEY"),
             SQLALCHEMY_DATABASE_URI=os.environ.get("SQLALCHEMY_DATABASE_URI"),
             JWT_SECRET_KEY=os.environ.get("JWT_SECRET_KEY"),
-            SQLALCHEMY_TRACK_MODIFICATIONS=False
+            SQLALCHEMY_TRACK_MODIFICATIONS=False,
+            SWAGGER={
+                'title': "Bookmarks API",
+                'uiversion': 3
+            }
         )
     else:
         app.config.from_mapping(test_config)
@@ -29,9 +34,12 @@ def create_app(test_config=None):
 
     app.register_blueprint(auth)
     app.register_blueprint(bookmarks)
+
+    Swagger(app, template=template, config=swagger_config)
     
     # short url redirect route
     @app.get("/<string:short_url>")
+    @swag_from('./docs/short_url.yaml')
     def get_short_url_redirect(short_url):
         bookmark=Bookmark.query.filter_by(short_url=short_url).first_or_404()
 

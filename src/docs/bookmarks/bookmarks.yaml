@@ -1,0 +1,27 @@
+Bookmarks
+---
+tags:
+  - Bookmarks
+parameters:
+  - name: body
+    description: The body should contain the records being added to the bookmarks
+    in: body
+    required: true
+    schema:
+      type: object
+      required:
+        - "body"
+        - "url"
+      properties:
+        body:
+          type: "string"
+          example: "My site"
+        url:
+          type: "string"
+          example: "https://www.example.com"
+responses:
+  201:
+    description: When a record has been successfully created
+
+  400:
+    description: Fails to add a record due to bad request data
